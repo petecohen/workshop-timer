@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workshop Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Timer Screen */
+        .timer-screen {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .timer-display {
+            font-size: clamp(10rem, 30vw, 25rem);
+            font-weight: 300;
+            text-align: center;
+            line-height: 0.8;
+            margin: 2rem 0;
+            font-variant-numeric: tabular-nums;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
+            letter-spacing: 0.05em;
+        }
+
+        .timer-controls {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 0.3rem;
+            padding-bottom: env(safe-area-inset-bottom, 0);
+            align-items: flex-end;
+            justify-content: flex-start;
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            min-width: 60px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn.primary {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn.selected {
+            background: rgba(128, 128, 128, 0.25);
+            color: rgba(128, 128, 128, 0.9);
+            border-color: rgba(128, 128, 128, 0.6);
+        }
+
+        .settings-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Settings Screen */
+        .settings-screen {
+            flex-direction: column;
+            padding: 2rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .settings-content {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .settings-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .preset-btn {
+            background: transparent;
+            border: 2px solid #fff;
+            color: #fff;
+            padding: 2rem 1rem;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover, .preset-btn.selected {
+            background: #fff;
+            color: #000;
+        }
+
+        .custom-timer {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .custom-timer h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .time-inputs {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .time-input {
+            background: transparent;
+            border: 2px solid #fff;
+            color: #fff;
+            padding: 0.5rem;
+            font-size: 2rem;
+            text-align: center;
+            width: 80px;
+            border-radius: 4px;
+        }
+
+        .time-input:focus {
+            outline: none;
+            border-color: #ccc;
+        }
+
+        .time-label {
+            font-size: 1.2rem;
+        }
+
+        .settings-controls {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .flash-setting {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .flash-setting h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .toggle-switch {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: transparent;
+            border: 2px solid #fff;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .switch.active {
+            background: #fff;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .switch.active::after {
+            background: #000;
+            transform: translateX(22px);
+        }
+
+        .attribution {
+            text-align: center;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .attribution a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .attribution a:hover {
+            color: #fff;
+        }
+
+        .settings-controls .btn {
+            background: transparent;
+            border: 3px solid #fff;
+            color: #fff;
+            padding: 1rem 2rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            min-width: 200px;
+        }
+
+        .settings-controls .btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .settings-controls .btn.primary {
+            background: #fff;
+            color: #000;
+        }
+
+        .settings-controls .btn.primary:hover {
+            background: transparent;
+            color: #fff;
+        }
+
+        .finished {
+            animation: flash 1s infinite;
+        }
+
+        @keyframes flash {
+            0%, 50% {
+                background: #000;
+                color: #fff;
+            }
+            51%, 100% {
+                background: #fff;
+                color: #000;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .timer-controls {
+                bottom: 3rem;
+                left: 1rem;
+                right: 1rem;
+                padding-bottom: calc(env(safe-area-inset-bottom, 0) + 1rem);
+                flex-wrap: wrap;
+                gap: 0.2rem;
+            }
+            .settings-content {
+                padding: 0 1rem;
+                gap: 2.5rem;
+            }
+            .settings-section {
+                padding: 1.5rem;
+            }
+            .time-inputs {
+                gap: 1.5rem;
+            }
+            .time-input {
+                width: 75px;
+                font-size: 1.5rem;
+                padding: 0.8rem;
+            }
+            .custom-timer-controls {
+                justify-content: center;
+            }
+            .custom-timer-btn {
+                padding: 1rem 2.5rem;
+                font-size: 1rem;
+            }
+            .preset-grid {
+                gap: 0.6rem;
+            }
+            .preset-btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.75rem;
+                min-width: 45px;
+            }
+            .back-button {
+                padding: 1rem 1.5rem;
+                font-size: 1rem;
+            }
+            .settings-btn {
+                top: 1rem;
+                right: 1rem;
+                padding-top: calc(env(safe-area-inset-top, 0) + 0.3rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Timer Screen -->
+    <div class="screen timer-screen active" id="timerScreen">
+        <div class="timer-display" id="timerDisplay">05:00</div>
+
+        <div class="timer-controls">
+            <button class="btn primary" id="startBtn" onclick="toggleTimer()">Start</button>
+            <button class="btn" onclick="resetTimer()">Reset</button>
+            <button class="btn" onclick="setPreset(30)">30s</button>
+            <button class="btn" onclick="setPreset(60)">1m</button>
+            <button class="btn" onclick="setPreset(120)">2m</button>
+            <button class="btn" onclick="setPreset(180)">3m</button>
+            <button class="btn" onclick="setPreset(240)">4m</button>
+            <button class="btn selected" onclick="setPreset(300)">5m</button>
+            <button class="btn" onclick="setPreset(600)">10m</button>
+            <button class="btn" onclick="setPreset(900)">15m</button>
+        </div>
+
+        <button class="settings-btn" onclick="showSettings()">⚙️ Settings</button>
+    </div>
+
+    <!-- Settings Screen -->
+    <div class="screen settings-screen" id="settingsScreen">
+        <div class="settings-content">
+            <h1 class="settings-title">Timer Settings</h1>
+
+            <div class="custom-timer">
+                <h3>Custom Timer</h3>
+                <p>Set a specific time for your timer</p>
+                <div class="time-inputs">
+                    <div>
+                        <input type="number" id="minutesInput" class="time-input" min="0" max="99" placeholder="0">
+                        <div class="time-label">Minutes</div>
+                    </div>
+                    <div>
+                        <input type="number" id="secondsInput" class="time-input" min="0" max="59" placeholder="0">
+                        <div class="time-label">Seconds</div>
+                    </div>
+                </div>
+                <button class="btn custom-timer-btn" onclick="setCustomTimer()">Apply Custom Timer</button>
+            </div>
+
+            <div>
+                <h3 style="text-align: center; margin-bottom: 1rem;">Quick Presets</h3>
+                <div class="preset-grid">
+                    <button class="preset-btn" onclick="setPreset(30)">30s</button>
+                    <button class="preset-btn" onclick="setPreset(60)">1m</button>
+                    <button class="preset-btn" onclick="setPreset(120)">2m</button>
+                    <button class="preset-btn" onclick="setPreset(180)">3m</button>
+                    <button class="preset-btn" onclick="setPreset(240)">4m</button>
+                    <button class="preset-btn" onclick="setPreset(300)">5m</button>
+                    <button class="preset-btn" onclick="setPreset(600)">10m</button>
+                    <button class="preset-btn" onclick="setPreset(900)">15m</button>
+                </div>
+            </div>
+
+            <div class="flash-setting">
+                <h3>Flash Alert</h3>
+                <p>Screen flashes when timer ends</p>
+                <div class="toggle-switch">
+                    <span>Off</span>
+                    <div class="switch active" id="flashToggle" onclick="toggleFlash()"></div>
+                    <span>On</span>
+                </div>
+            </div>
+
+            <div class="settings-controls">
+                <button class="btn primary back-button" onclick="showTimer()">← Back to Timer</button>
+            </div>
+
+            <div class="attribution">
+                Made by <a href="https://coff.ee/petecohen">Pete Cohen</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let timerDuration = 300; // 5 minutes default
+        let currentTime = timerDuration;
+        let isRunning = false;
+        let timerInterval = null;
+        let isFinished = false;
+        let flashEnabled = true; // Flash setting
+
+        const timerDisplay = document.getElementById('timerDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const timerScreen = document.getElementById('timerScreen');
+        const settingsScreen = document.getElementById('settingsScreen');
+        const flashToggle = document.getElementById('flashToggle');
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            timerDisplay.textContent = formatTime(currentTime);
+            if (currentTime === 0 && !isFinished) {
+                isFinished = true;
+                isRunning = false;
+                startBtn.textContent = 'Start';
+                if (flashEnabled) {
+                    document.body.classList.add('finished');
+                    // Flash for 10 seconds then stop
+                    setTimeout(() => {
+                        document.body.classList.remove('finished');
+                        isFinished = false;
+                    }, 10000);
+                } else {
+                    isFinished = false;
+                }
+            }
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            if (currentTime === 0) {
+                resetTimer();
+            }
+            isRunning = true;
+            startBtn.textContent = 'Pause';
+            document.body.classList.remove('finished');
+            isFinished = false;
+            timerInterval = setInterval(() => {
+                if (currentTime > 0) {
+                    currentTime--;
+                    updateDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    startBtn.textContent = 'Start';
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            isRunning = false;
+            startBtn.textContent = 'Start';
+            clearInterval(timerInterval);
+        }
+
+        function resetTimer() {
+            isRunning = false;
+            startBtn.textContent = 'Start';
+            clearInterval(timerInterval);
+            currentTime = timerDuration;
+            document.body.classList.remove('finished');
+            isFinished = false;
+            updateDisplay();
+        }
+
+        function setPreset(seconds) {
+            timerDuration = seconds;
+            currentTime = timerDuration;
+            updateDisplay();
+            pauseTimer();
+            // Update selected preset button in both timer and settings screens
+            document.querySelectorAll('.preset-btn, .timer-controls .btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            // Find and select the corresponding buttons
+            document.querySelectorAll(`[onclick="setPreset(${seconds})"]`).forEach(btn => {
+                btn.classList.add('selected');
+            });
+        }
+
+        function setCustomTimer() {
+            const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+            const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+            const totalSeconds = minutes * 60 + seconds;
+            if (totalSeconds > 0) {
+                timerDuration = totalSeconds;
+                currentTime = timerDuration;
+                updateDisplay();
+                pauseTimer();
+                // Clear preset selection from both timer and settings screens
+                document.querySelectorAll('.preset-btn, .timer-controls .btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                // Show visual feedback that custom timer was applied
+                const customBtn = document.querySelector('.custom-timer-btn');
+                const originalText = customBtn.textContent;
+                customBtn.textContent = '✓ Applied!';
+                customBtn.style.background = 'rgba(34, 197, 94, 0.9)';
+                setTimeout(() => {
+                    customBtn.textContent = originalText;
+                    customBtn.style.background = 'rgba(255, 255, 255, 0.9)';
+                }, 2000);
+            }
+        }
+
+        function showSettings() {
+            timerScreen.classList.remove('active');
+            settingsScreen.classList.add('active');
+        }
+
+        function showTimer() {
+            settingsScreen.classList.remove('active');
+            timerScreen.classList.add('active');
+        }
+
+        function toggleFlash() {
+            flashEnabled = !flashEnabled;
+            if (flashEnabled) {
+                flashToggle.classList.add('active');
+            } else {
+                flashToggle.classList.remove('active');
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                toggleTimer();
+            } else if (e.code === 'KeyR') {
+                e.preventDefault();
+                resetTimer();
+            } else if (e.code === 'KeyS') {
+                e.preventDefault();
+                if (timerScreen.classList.contains('active')) {
+                    showSettings();
+                } else {
+                    showTimer();
+                }
+            }
+        });
+
+        // Prevent zooming on double tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Initialize display
+        updateDisplay();
+
+        // Initialize flash toggle
+        if (flashEnabled) {
+            document.getElementById('flashToggle').classList.add('active');
+        }
+    </script>
+</body>
+</html>
