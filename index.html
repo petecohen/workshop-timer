@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A simple, full-screen countdown timer for workshops and presentations">
     <title>Workshop Timer</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9201;</text></svg>">
     <style>
         * {
             margin: 0;
@@ -11,10 +13,17 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --bg-r: 0; --bg-g: 0; --bg-b: 0;
+            --text-r: 255; --text-g: 255; --text-b: 255;
+        }
+
         body {
-            font-family: 'Arial', sans-serif;
-            background: #000;
-            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
@@ -48,7 +57,6 @@
             line-height: 0.8;
             margin: 2rem 0;
             font-variant-numeric: tabular-nums;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
             letter-spacing: 0.05em;
         }
 
@@ -66,20 +74,21 @@
 
         .btn {
             background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(var(--text-r), var(--text-g), var(--text-b), 0.3);
+            color: rgba(var(--text-r), var(--text-g), var(--text-b), 0.6);
             padding: 0.3rem 0.6rem;
             font-size: 0.8rem;
             cursor: pointer;
             border-radius: 4px;
             transition: all 0.2s;
             min-width: 60px;
+            font-family: inherit;
         }
 
         .btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.9);
-            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(var(--text-r), var(--text-g), var(--text-b), 0.1);
+            color: rgba(var(--text-r), var(--text-g), var(--text-b), 0.9);
+            border-color: rgba(var(--text-r), var(--text-g), var(--text-b), 0.6);
         }
 
         .btn:active {
@@ -87,15 +96,15 @@
         }
 
         .btn.primary {
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.8);
-            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(var(--text-r), var(--text-g), var(--text-b), 0.1);
+            color: rgba(var(--text-r), var(--text-g), var(--text-b), 0.8);
+            border-color: rgba(var(--text-r), var(--text-g), var(--text-b), 0.5);
         }
 
         .btn.selected {
-            background: rgba(128, 128, 128, 0.25);
-            color: rgba(128, 128, 128, 0.9);
-            border-color: rgba(128, 128, 128, 0.6);
+            background: rgba(var(--text-r), var(--text-g), var(--text-b), 0.15);
+            color: rgba(var(--text-r), var(--text-g), var(--text-b), 0.5);
+            border-color: rgba(var(--text-r), var(--text-g), var(--text-b), 0.3);
         }
 
         .settings-btn {
@@ -103,19 +112,20 @@
             top: 1rem;
             right: 1rem;
             background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(var(--text-r), var(--text-g), var(--text-b), 0.3);
+            color: rgba(var(--text-r), var(--text-g), var(--text-b), 0.6);
             padding: 0.3rem 0.6rem;
             font-size: 0.8rem;
             cursor: pointer;
             border-radius: 4px;
             transition: all 0.2s;
+            font-family: inherit;
         }
 
         .settings-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.9);
-            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(var(--text-r), var(--text-g), var(--text-b), 0.1);
+            color: rgba(var(--text-r), var(--text-g), var(--text-b), 0.9);
+            border-color: rgba(var(--text-r), var(--text-g), var(--text-b), 0.6);
         }
 
         /* Settings Screen */
@@ -123,191 +133,338 @@
             flex-direction: column;
             padding: 2rem;
             align-items: center;
-            justify-content: center;
+            overflow-y: auto;
+            background: #1a1a1a;
+            color: #e0e0e0;
         }
 
         .settings-content {
-            max-width: 600px;
+            max-width: 480px;
             width: 100%;
+            padding: 1rem 0;
+        }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+            line-height: 1;
+            font-family: inherit;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .settings-title {
-            font-size: 2.5rem;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .preset-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .preset-btn {
-            background: transparent;
-            border: 2px solid #fff;
-            color: #fff;
-            padding: 2rem 1rem;
-            font-size: 1.2rem;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-
-        .preset-btn:hover, .preset-btn.selected {
-            background: #fff;
-            color: #000;
-        }
-
-        .custom-timer {
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .custom-timer h3 {
             font-size: 1.5rem;
+            font-weight: 600;
+            margin-left: 0.75rem;
+        }
+
+        .settings-section {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 1.25rem;
             margin-bottom: 1rem;
         }
 
-        .time-inputs {
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #888;
+            margin-bottom: 1rem;
+        }
+
+        .setting-row {
             display: flex;
-            justify-content: center;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            justify-content: space-between;
+            padding: 0.5rem 0;
         }
 
-        .time-input {
-            background: transparent;
-            border: 2px solid #fff;
-            color: #fff;
-            padding: 0.5rem;
-            font-size: 2rem;
-            text-align: center;
-            width: 80px;
-            border-radius: 4px;
+        .setting-row + .setting-row {
+            border-top: 1px solid #3a3a3a;
+            margin-top: 0.5rem;
+            padding-top: 1rem;
         }
 
-        .time-input:focus {
-            outline: none;
-            border-color: #ccc;
+        .setting-label {
+            font-size: 0.95rem;
         }
 
-        .time-label {
-            font-size: 1.2rem;
+        .setting-sublabel {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.2rem;
         }
 
-        .settings-controls {
+        /* Color pickers */
+        .color-picker-wrapper {
             display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .flash-setting {
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .flash-setting h3 {
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .toggle-switch {
-            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .switch {
+        .color-preview {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 2px solid #555;
+            cursor: pointer;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .color-preview::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-preview::-webkit-color-swatch {
+            border: none;
+            border-radius: 6px;
+        }
+
+        .color-preview::-moz-color-swatch {
+            border: none;
+            border-radius: 6px;
+        }
+
+        .color-hex {
+            font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+            font-size: 0.85rem;
+            color: #aaa;
+            min-width: 65px;
+        }
+
+        /* Preset grid */
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+
+        .preset-btn {
+            background: #3a3a3a;
+            border: 2px solid transparent;
+            color: #e0e0e0;
+            padding: 0.75rem 0.5rem;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .preset-btn:hover {
+            background: #4a4a4a;
+        }
+
+        .preset-btn.selected {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        /* Custom time inputs */
+        .custom-time-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #3a3a3a;
+        }
+
+        .time-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .time-input {
+            background: #3a3a3a;
+            border: 1px solid #555;
+            color: #e0e0e0;
+            padding: 0.5rem;
+            font-size: 1.1rem;
+            text-align: center;
+            width: 55px;
+            border-radius: 6px;
+            font-family: inherit;
+        }
+
+        .time-input:focus {
+            outline: none;
+            border-color: #888;
+        }
+
+        .time-unit {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .apply-btn {
+            background: #3a3a3a;
+            border: 1px solid #555;
+            color: #e0e0e0;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            margin-left: auto;
+            font-family: inherit;
+        }
+
+        .apply-btn:hover {
+            background: #4a4a4a;
+            border-color: #888;
+        }
+
+        .apply-btn.applied {
+            background: #2d5a2d;
+            border-color: #4a8a4a;
+            color: #8fdf8f;
+        }
+
+        /* Toggle switch */
+        .toggle-track {
             position: relative;
-            width: 50px;
+            width: 44px;
             height: 24px;
-            background: transparent;
-            border: 2px solid #fff;
+            background: #555;
             border-radius: 12px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.2s;
+            flex-shrink: 0;
         }
 
-        .switch.active {
-            background: #fff;
+        .toggle-track[aria-checked="true"] {
+            background: #4cd964;
         }
 
-        .switch::after {
+        .toggle-track::after {
             content: '';
             position: absolute;
             top: 2px;
             left: 2px;
-            width: 16px;
-            height: 16px;
+            width: 20px;
+            height: 20px;
             background: #fff;
             border-radius: 50%;
-            transition: all 0.2s;
+            transition: transform 0.2s;
         }
 
-        .switch.active::after {
-            background: #000;
-            transform: translateX(22px);
+        .toggle-track[aria-checked="true"]::after {
+            transform: translateX(20px);
+        }
+
+        /* Keyboard shortcuts */
+        .shortcut-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .shortcut-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .shortcut-row + .shortcut-row {
+            border-top: 1px solid #3a3a3a;
+            padding-top: 0.5rem;
+        }
+
+        .shortcut-key {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        kbd {
+            background: #3a3a3a;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 0.15rem 0.4rem;
+            font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+
+        /* Reset button */
+        .reset-defaults-btn {
+            background: none;
+            border: 1px solid #555;
+            color: #888;
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .reset-defaults-btn:hover {
+            border-color: #888;
+            color: #ccc;
         }
 
         .attribution {
             text-align: center;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 1.5rem;
+            padding-bottom: env(safe-area-inset-bottom, 0);
         }
 
         .attribution a {
-            color: rgba(255, 255, 255, 0.8);
+            color: #888;
             text-decoration: none;
             transition: color 0.2s;
         }
 
         .attribution a:hover {
-            color: #fff;
+            color: #ccc;
         }
 
-        .settings-controls .btn {
-            background: transparent;
-            border: 3px solid #fff;
-            color: #fff;
-            padding: 1rem 2rem;
-            font-size: 1.5rem;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.2s;
-            min-width: 200px;
-        }
-
-        .settings-controls .btn:hover {
-            background: #fff;
-            color: #000;
-        }
-
-        .settings-controls .btn.primary {
-            background: #fff;
-            color: #000;
-        }
-
-        .settings-controls .btn.primary:hover {
-            background: transparent;
-            color: #fff;
-        }
-
+        /* Flash animation */
         .finished {
             animation: flash 1s infinite;
         }
 
         @keyframes flash {
             0%, 50% {
-                background: #000;
-                color: #fff;
+                background: var(--bg-color);
+                color: var(--text-color);
             }
             51%, 100% {
-                background: #fff;
-                color: #000;
+                background: var(--text-color);
+                color: var(--bg-color);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .finished {
+                animation: none;
+                background: var(--text-color);
+                color: var(--bg-color);
             }
         }
 
@@ -320,39 +477,16 @@
                 flex-wrap: wrap;
                 gap: 0.2rem;
             }
-            .settings-content {
-                padding: 0 1rem;
-                gap: 2.5rem;
-            }
-            .settings-section {
-                padding: 1.5rem;
-            }
-            .time-inputs {
-                gap: 1.5rem;
-            }
-            .time-input {
-                width: 75px;
-                font-size: 1.5rem;
-                padding: 0.8rem;
-            }
-            .custom-timer-controls {
-                justify-content: center;
-            }
-            .custom-timer-btn {
-                padding: 1rem 2.5rem;
-                font-size: 1rem;
+            .settings-screen {
+                padding: 1rem;
             }
             .preset-grid {
-                gap: 0.6rem;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.4rem;
             }
             .preset-btn {
-                padding: 0.5rem 0.8rem;
-                font-size: 0.75rem;
-                min-width: 45px;
-            }
-            .back-button {
-                padding: 1rem 1.5rem;
-                font-size: 1rem;
+                padding: 0.6rem 0.3rem;
+                font-size: 0.85rem;
             }
             .settings-btn {
                 top: 1rem;
@@ -364,73 +498,114 @@
 </head>
 <body>
     <!-- Timer Screen -->
-    <div class="screen timer-screen active" id="timerScreen">
-        <div class="timer-display" id="timerDisplay">05:00</div>
+    <div class="screen timer-screen active" id="timerScreen" role="main" aria-label="Timer">
+        <div class="timer-display" id="timerDisplay" role="timer" aria-live="polite" aria-atomic="true">05:00</div>
 
-        <div class="timer-controls">
-            <button class="btn primary" id="startBtn" onclick="toggleTimer()">Start</button>
-            <button class="btn" onclick="resetTimer()">Reset</button>
-            <button class="btn" onclick="setPreset(30)">30s</button>
-            <button class="btn" onclick="setPreset(60)">1m</button>
-            <button class="btn" onclick="setPreset(120)">2m</button>
-            <button class="btn" onclick="setPreset(180)">3m</button>
-            <button class="btn" onclick="setPreset(240)">4m</button>
-            <button class="btn selected" onclick="setPreset(300)">5m</button>
-            <button class="btn" onclick="setPreset(600)">10m</button>
-            <button class="btn" onclick="setPreset(900)">15m</button>
+        <div class="timer-controls" role="toolbar" aria-label="Timer controls">
+            <button class="btn primary" id="startBtn" aria-label="Start timer">Start</button>
+            <button class="btn" id="resetBtn" aria-label="Reset timer">Reset</button>
+            <button class="btn" data-preset="30" aria-label="Set 30 seconds">30s</button>
+            <button class="btn" data-preset="60" aria-label="Set 1 minute">1m</button>
+            <button class="btn" data-preset="120" aria-label="Set 2 minutes">2m</button>
+            <button class="btn" data-preset="180" aria-label="Set 3 minutes">3m</button>
+            <button class="btn" data-preset="240" aria-label="Set 4 minutes">4m</button>
+            <button class="btn selected" data-preset="300" aria-label="Set 5 minutes">5m</button>
+            <button class="btn" data-preset="600" aria-label="Set 10 minutes">10m</button>
+            <button class="btn" data-preset="900" aria-label="Set 15 minutes">15m</button>
         </div>
 
-        <button class="settings-btn" onclick="showSettings()">⚙️ Settings</button>
+        <button class="settings-btn" id="settingsOpenBtn" aria-label="Open settings">Settings</button>
     </div>
 
     <!-- Settings Screen -->
-    <div class="screen settings-screen" id="settingsScreen">
+    <div class="screen settings-screen" id="settingsScreen" role="complementary" aria-label="Settings">
         <div class="settings-content">
-            <h1 class="settings-title">Timer Settings</h1>
+            <div class="settings-header">
+                <button class="back-btn" id="backBtn" aria-label="Back to timer">&larr;</button>
+                <h1 class="settings-title">Settings</h1>
+            </div>
 
-            <div class="custom-timer">
-                <h3>Custom Timer</h3>
-                <p>Set a specific time for your timer</p>
-                <div class="time-inputs">
+            <!-- Colours section -->
+            <div class="settings-section">
+                <div class="section-label">Colours</div>
+                <div class="setting-row">
                     <div>
-                        <input type="number" id="minutesInput" class="time-input" min="0" max="99" placeholder="0">
-                        <div class="time-label">Minutes</div>
+                        <div class="setting-label">Background</div>
                     </div>
+                    <div class="color-picker-wrapper">
+                        <span class="color-hex" id="bgHex">#000000</span>
+                        <input type="color" class="color-preview" id="bgColorPicker" value="#000000" aria-label="Background colour">
+                    </div>
+                </div>
+                <div class="setting-row">
                     <div>
-                        <input type="number" id="secondsInput" class="time-input" min="0" max="59" placeholder="0">
-                        <div class="time-label">Seconds</div>
+                        <div class="setting-label">Text</div>
+                    </div>
+                    <div class="color-picker-wrapper">
+                        <span class="color-hex" id="textHex">#ffffff</span>
+                        <input type="color" class="color-preview" id="textColorPicker" value="#ffffff" aria-label="Text colour">
                     </div>
                 </div>
-                <button class="btn custom-timer-btn" onclick="setCustomTimer()">Apply Custom Timer</button>
             </div>
 
-            <div>
-                <h3 style="text-align: center; margin-bottom: 1rem;">Quick Presets</h3>
-                <div class="preset-grid">
-                    <button class="preset-btn" onclick="setPreset(30)">30s</button>
-                    <button class="preset-btn" onclick="setPreset(60)">1m</button>
-                    <button class="preset-btn" onclick="setPreset(120)">2m</button>
-                    <button class="preset-btn" onclick="setPreset(180)">3m</button>
-                    <button class="preset-btn" onclick="setPreset(240)">4m</button>
-                    <button class="preset-btn" onclick="setPreset(300)">5m</button>
-                    <button class="preset-btn" onclick="setPreset(600)">10m</button>
-                    <button class="preset-btn" onclick="setPreset(900)">15m</button>
+            <!-- Duration section -->
+            <div class="settings-section">
+                <div class="section-label">Duration</div>
+                <div class="preset-grid" role="group" aria-label="Preset durations">
+                    <button class="preset-btn" data-preset="30">30s</button>
+                    <button class="preset-btn" data-preset="60">1m</button>
+                    <button class="preset-btn" data-preset="120">2m</button>
+                    <button class="preset-btn" data-preset="180">3m</button>
+                    <button class="preset-btn" data-preset="240">4m</button>
+                    <button class="preset-btn selected" data-preset="300">5m</button>
+                    <button class="preset-btn" data-preset="600">10m</button>
+                    <button class="preset-btn" data-preset="900">15m</button>
+                </div>
+                <div class="custom-time-row">
+                    <div class="time-input-group">
+                        <input type="number" id="minutesInput" class="time-input" min="0" max="99" placeholder="0" aria-label="Minutes">
+                        <span class="time-unit">m</span>
+                    </div>
+                    <div class="time-input-group">
+                        <input type="number" id="secondsInput" class="time-input" min="0" max="59" placeholder="0" aria-label="Seconds">
+                        <span class="time-unit">s</span>
+                    </div>
+                    <button class="apply-btn" id="applyCustomBtn">Apply</button>
                 </div>
             </div>
 
-            <div class="flash-setting">
-                <h3>Flash Alert</h3>
-                <p>Screen flashes when timer ends</p>
-                <div class="toggle-switch">
-                    <span>Off</span>
-                    <div class="switch active" id="flashToggle" onclick="toggleFlash()"></div>
-                    <span>On</span>
+            <!-- Flash alert section -->
+            <div class="settings-section">
+                <div class="section-label">Alerts</div>
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-label">Flash alert</div>
+                        <div class="setting-sublabel">Screen flashes when timer ends</div>
+                    </div>
+                    <div class="toggle-track" id="flashToggle" role="switch" aria-checked="true" aria-label="Flash alert" tabindex="0"></div>
                 </div>
             </div>
 
-            <div class="settings-controls">
-                <button class="btn primary back-button" onclick="showTimer()">← Back to Timer</button>
+            <!-- Keyboard shortcuts section -->
+            <div class="settings-section">
+                <div class="section-label">Keyboard Shortcuts</div>
+                <div class="shortcut-list">
+                    <div class="shortcut-row">
+                        <span class="setting-label">Start / Pause</span>
+                        <span class="shortcut-key"><kbd>Space</kbd></span>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="setting-label">Reset</span>
+                        <span class="shortcut-key"><kbd>R</kbd></span>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="setting-label">Settings</span>
+                        <span class="shortcut-key"><kbd>S</kbd></span>
+                    </div>
+                </div>
             </div>
+
+            <button class="reset-defaults-btn" id="resetDefaultsBtn">Reset to Defaults</button>
 
             <div class="attribution">
                 Made by <a href="https://coff.ee/petecohen">Pete Cohen</a>
@@ -439,19 +614,95 @@
     </div>
 
     <script>
-        let timerDuration = 300; // 5 minutes default
+        // --- State ---
+        const DEFAULTS = {
+            duration: 300,
+            bgColor: '#000000',
+            textColor: '#ffffff',
+            flashEnabled: true
+        };
+
+        let timerDuration = DEFAULTS.duration;
         let currentTime = timerDuration;
         let isRunning = false;
         let timerInterval = null;
         let isFinished = false;
-        let flashEnabled = true; // Flash setting
+        let flashEnabled = DEFAULTS.flashEnabled;
+        let startTimestamp = null;
+        let pausedTimeRemaining = null;
+        let flashTimeout = null;
 
+        // --- DOM refs ---
         const timerDisplay = document.getElementById('timerDisplay');
         const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
         const timerScreen = document.getElementById('timerScreen');
         const settingsScreen = document.getElementById('settingsScreen');
         const flashToggle = document.getElementById('flashToggle');
+        const bgColorPicker = document.getElementById('bgColorPicker');
+        const textColorPicker = document.getElementById('textColorPicker');
+        const bgHex = document.getElementById('bgHex');
+        const textHex = document.getElementById('textHex');
+        const settingsOpenBtn = document.getElementById('settingsOpenBtn');
+        const backBtn = document.getElementById('backBtn');
+        const applyCustomBtn = document.getElementById('applyCustomBtn');
+        const resetDefaultsBtn = document.getElementById('resetDefaultsBtn');
 
+        // --- Preferences (localStorage) ---
+        function loadPrefs() {
+            try {
+                const saved = localStorage.getItem('workshopTimerPrefs');
+                if (saved) {
+                    const prefs = JSON.parse(saved);
+                    timerDuration = prefs.duration ?? DEFAULTS.duration;
+                    currentTime = timerDuration;
+                    flashEnabled = prefs.flashEnabled ?? DEFAULTS.flashEnabled;
+                    applyColors(prefs.bgColor ?? DEFAULTS.bgColor, prefs.textColor ?? DEFAULTS.textColor);
+                    return prefs;
+                }
+            } catch (e) { /* ignore */ }
+            return null;
+        }
+
+        function savePrefs() {
+            const prefs = {
+                duration: timerDuration,
+                bgColor: bgColorPicker.value,
+                textColor: textColorPicker.value,
+                flashEnabled: flashEnabled
+            };
+            try {
+                localStorage.setItem('workshopTimerPrefs', JSON.stringify(prefs));
+            } catch (e) { /* ignore */ }
+        }
+
+        // --- Color management ---
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return { r, g, b };
+        }
+
+        function applyColors(bg, text) {
+            const root = document.documentElement;
+            root.style.setProperty('--bg-color', bg);
+            root.style.setProperty('--text-color', text);
+            const bgRgb = hexToRgb(bg);
+            const textRgb = hexToRgb(text);
+            root.style.setProperty('--bg-r', bgRgb.r);
+            root.style.setProperty('--bg-g', bgRgb.g);
+            root.style.setProperty('--bg-b', bgRgb.b);
+            root.style.setProperty('--text-r', textRgb.r);
+            root.style.setProperty('--text-g', textRgb.g);
+            root.style.setProperty('--text-b', textRgb.b);
+            bgColorPicker.value = bg;
+            textColorPicker.value = text;
+            bgHex.textContent = bg;
+            textHex.textContent = text;
+        }
+
+        // --- Timer logic (drift-corrected) ---
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
@@ -460,21 +711,60 @@
 
         function updateDisplay() {
             timerDisplay.textContent = formatTime(currentTime);
-            if (currentTime === 0 && !isFinished) {
-                isFinished = true;
-                isRunning = false;
-                startBtn.textContent = 'Start';
-                if (flashEnabled) {
-                    document.body.classList.add('finished');
-                    // Flash for 10 seconds then stop
-                    setTimeout(() => {
-                        document.body.classList.remove('finished');
-                        isFinished = false;
-                    }, 10000);
-                } else {
+        }
+
+        function onTimerFinished() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            isRunning = false;
+            isFinished = true;
+            startBtn.textContent = 'Start';
+            startBtn.setAttribute('aria-label', 'Start timer');
+            currentTime = 0;
+            updateDisplay();
+
+            if (flashEnabled) {
+                document.body.classList.add('finished');
+                if (flashTimeout) clearTimeout(flashTimeout);
+                flashTimeout = setTimeout(() => {
+                    document.body.classList.remove('finished');
                     isFinished = false;
-                }
+                    flashTimeout = null;
+                }, 10000);
             }
+        }
+
+        function tick() {
+            const elapsed = Math.floor((Date.now() - startTimestamp) / 1000);
+            const remaining = pausedTimeRemaining - elapsed;
+            if (remaining <= 0) {
+                onTimerFinished();
+            } else {
+                currentTime = remaining;
+                updateDisplay();
+            }
+        }
+
+        function startTimer() {
+            if (currentTime === 0) {
+                currentTime = timerDuration;
+            }
+            isRunning = true;
+            isFinished = false;
+            document.body.classList.remove('finished');
+            if (flashTimeout) { clearTimeout(flashTimeout); flashTimeout = null; }
+            startBtn.textContent = 'Pause';
+            startBtn.setAttribute('aria-label', 'Pause timer');
+            startTimestamp = Date.now();
+            pausedTimeRemaining = currentTime;
+            timerInterval = setInterval(tick, 250);
+        }
+
+        function pauseTimer() {
+            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+            isRunning = false;
+            startBtn.textContent = 'Start';
+            startBtn.setAttribute('aria-label', 'Start timer');
         }
 
         function toggleTimer() {
@@ -485,54 +775,31 @@
             }
         }
 
-        function startTimer() {
-            if (currentTime === 0) {
-                resetTimer();
-            }
-            isRunning = true;
-            startBtn.textContent = 'Pause';
-            document.body.classList.remove('finished');
-            isFinished = false;
-            timerInterval = setInterval(() => {
-                if (currentTime > 0) {
-                    currentTime--;
-                    updateDisplay();
-                } else {
-                    clearInterval(timerInterval);
-                    isRunning = false;
-                    startBtn.textContent = 'Start';
-                }
-            }, 1000);
-        }
-
-        function pauseTimer() {
-            isRunning = false;
-            startBtn.textContent = 'Start';
-            clearInterval(timerInterval);
-        }
-
         function resetTimer() {
+            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
             isRunning = false;
-            startBtn.textContent = 'Start';
-            clearInterval(timerInterval);
-            currentTime = timerDuration;
-            document.body.classList.remove('finished');
             isFinished = false;
+            document.body.classList.remove('finished');
+            if (flashTimeout) { clearTimeout(flashTimeout); flashTimeout = null; }
+            startBtn.textContent = 'Start';
+            startBtn.setAttribute('aria-label', 'Start timer');
+            currentTime = timerDuration;
             updateDisplay();
         }
 
         function setPreset(seconds) {
             timerDuration = seconds;
             currentTime = timerDuration;
+            if (isRunning) pauseTimer();
             updateDisplay();
-            pauseTimer();
-            // Update selected preset button in both timer and settings screens
-            document.querySelectorAll('.preset-btn, .timer-controls .btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            // Find and select the corresponding buttons
-            document.querySelectorAll(`[onclick="setPreset(${seconds})"]`).forEach(btn => {
-                btn.classList.add('selected');
+            updatePresetSelection(seconds);
+            savePrefs();
+        }
+
+        function updatePresetSelection(seconds) {
+            document.querySelectorAll('[data-preset]').forEach(btn => {
+                const val = parseInt(btn.dataset.preset);
+                btn.classList.toggle('selected', val === seconds);
             });
         }
 
@@ -543,24 +810,20 @@
             if (totalSeconds > 0) {
                 timerDuration = totalSeconds;
                 currentTime = timerDuration;
+                if (isRunning) pauseTimer();
                 updateDisplay();
-                pauseTimer();
-                // Clear preset selection from both timer and settings screens
-                document.querySelectorAll('.preset-btn, .timer-controls .btn').forEach(btn => {
-                    btn.classList.remove('selected');
-                });
-                // Show visual feedback that custom timer was applied
-                const customBtn = document.querySelector('.custom-timer-btn');
-                const originalText = customBtn.textContent;
-                customBtn.textContent = '✓ Applied!';
-                customBtn.style.background = 'rgba(34, 197, 94, 0.9)';
+                updatePresetSelection(-1);
+                savePrefs();
+                applyCustomBtn.textContent = 'Applied';
+                applyCustomBtn.classList.add('applied');
                 setTimeout(() => {
-                    customBtn.textContent = originalText;
-                    customBtn.style.background = 'rgba(255, 255, 255, 0.9)';
-                }, 2000);
+                    applyCustomBtn.textContent = 'Apply';
+                    applyCustomBtn.classList.remove('applied');
+                }, 1500);
             }
         }
 
+        // --- Screen navigation ---
         function showSettings() {
             timerScreen.classList.remove('active');
             settingsScreen.classList.add('active');
@@ -571,17 +834,62 @@
             timerScreen.classList.add('active');
         }
 
-        function toggleFlash() {
-            flashEnabled = !flashEnabled;
-            if (flashEnabled) {
-                flashToggle.classList.add('active');
-            } else {
-                flashToggle.classList.remove('active');
-            }
-        }
+        // --- Event listeners ---
+        startBtn.addEventListener('click', toggleTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        settingsOpenBtn.addEventListener('click', showSettings);
+        backBtn.addEventListener('click', showTimer);
+        applyCustomBtn.addEventListener('click', setCustomTimer);
 
-        // Keyboard shortcuts
+        // Preset buttons (both screens)
+        document.querySelectorAll('[data-preset]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setPreset(parseInt(btn.dataset.preset));
+            });
+        });
+
+        // Flash toggle
+        flashToggle.addEventListener('click', () => {
+            flashEnabled = !flashEnabled;
+            flashToggle.setAttribute('aria-checked', flashEnabled);
+            savePrefs();
+        });
+
+        flashToggle.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'Enter') {
+                e.preventDefault();
+                flashToggle.click();
+            }
+        });
+
+        // Color pickers
+        bgColorPicker.addEventListener('input', () => {
+            applyColors(bgColorPicker.value, textColorPicker.value);
+            savePrefs();
+        });
+
+        textColorPicker.addEventListener('input', () => {
+            applyColors(bgColorPicker.value, textColorPicker.value);
+            savePrefs();
+        });
+
+        // Reset to defaults
+        resetDefaultsBtn.addEventListener('click', () => {
+            timerDuration = DEFAULTS.duration;
+            currentTime = timerDuration;
+            flashEnabled = DEFAULTS.flashEnabled;
+            flashToggle.setAttribute('aria-checked', flashEnabled);
+            applyColors(DEFAULTS.bgColor, DEFAULTS.textColor);
+            updatePresetSelection(DEFAULTS.duration);
+            if (isRunning) pauseTimer();
+            updateDisplay();
+            savePrefs();
+        });
+
+        // Keyboard shortcuts (skip when in input fields)
         document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
             if (e.code === 'Space') {
                 e.preventDefault();
                 toggleTimer();
@@ -595,26 +903,28 @@
                 } else {
                     showTimer();
                 }
+            } else if (e.code === 'Escape' && settingsScreen.classList.contains('active')) {
+                showTimer();
             }
         });
 
-        // Prevent zooming on double tap
+        // Prevent zooming on double tap (mobile)
         let lastTouchEnd = 0;
-        document.addEventListener('touchend', function (event) {
-            const now = (new Date()).getTime();
+        document.addEventListener('touchend', (event) => {
+            const now = Date.now();
             if (now - lastTouchEnd <= 300) {
                 event.preventDefault();
             }
             lastTouchEnd = now;
         }, false);
 
-        // Initialize display
-        updateDisplay();
-
-        // Initialize flash toggle
-        if (flashEnabled) {
-            document.getElementById('flashToggle').classList.add('active');
+        // --- Init ---
+        const savedPrefs = loadPrefs();
+        if (savedPrefs) {
+            flashToggle.setAttribute('aria-checked', flashEnabled);
+            updatePresetSelection(timerDuration);
         }
+        updateDisplay();
     </script>
 </body>
 </html>
