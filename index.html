@@ -312,6 +312,49 @@
             border-color: #888;
         }
 
+        /* Hide native spinners — using custom buttons instead */
+        .time-input::-webkit-inner-spin-button,
+        .time-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .time-input {
+            -moz-appearance: textfield;
+        }
+
+        .stepper {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .stepper-btn {
+            background: #3a3a3a;
+            border: 1px solid #555;
+            color: #aaa;
+            font-size: 0.65rem;
+            cursor: pointer;
+            padding: 0.1rem 0.4rem;
+            line-height: 1;
+            font-family: inherit;
+            transition: background 0.15s;
+        }
+
+        .stepper-btn:first-child {
+            border-radius: 4px 4px 0 0;
+        }
+
+        .stepper-btn:last-child {
+            border-radius: 0 0 4px 4px;
+            border-top: none;
+        }
+
+        .stepper-btn:hover {
+            background: #4a4a4a;
+            color: #e0e0e0;
+        }
+
         .time-unit {
             font-size: 0.8rem;
             color: #888;
@@ -563,11 +606,19 @@
                 </div>
                 <div class="custom-time-row">
                     <div class="time-input-group">
-                        <input type="number" id="minutesInput" class="time-input" min="0" max="99" placeholder="0" aria-label="Minutes">
+                        <input type="number" id="minutesInput" class="time-input" min="0" max="99" placeholder="0" aria-label="Minutes" inputmode="numeric">
+                        <div class="stepper">
+                            <button class="stepper-btn" data-target="minutesInput" data-dir="1" aria-label="Increase minutes">&#9650;</button>
+                            <button class="stepper-btn" data-target="minutesInput" data-dir="-1" aria-label="Decrease minutes">&#9660;</button>
+                        </div>
                         <span class="time-unit">m</span>
                     </div>
                     <div class="time-input-group">
-                        <input type="number" id="secondsInput" class="time-input" min="0" max="59" placeholder="0" aria-label="Seconds">
+                        <input type="number" id="secondsInput" class="time-input" min="0" max="59" placeholder="0" aria-label="Seconds" inputmode="numeric">
+                        <div class="stepper">
+                            <button class="stepper-btn" data-target="secondsInput" data-dir="1" aria-label="Increase seconds">&#9650;</button>
+                            <button class="stepper-btn" data-target="secondsInput" data-dir="-1" aria-label="Decrease seconds">&#9660;</button>
+                        </div>
                         <span class="time-unit">s</span>
                     </div>
                     <button class="apply-btn" id="applyCustomBtn">Apply</button>
@@ -908,6 +959,21 @@
             } else if (e.code === 'Escape' && settingsScreen.classList.contains('active')) {
                 showTimer();
             }
+        });
+
+        // Stepper buttons
+        document.querySelectorAll('.stepper-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const input = document.getElementById(btn.dataset.target);
+                const dir = parseInt(btn.dataset.dir);
+                const min = parseInt(input.min) || 0;
+                const max = parseInt(input.max) || 99;
+                const current = parseInt(input.value) || 0;
+                const next = current + dir;
+                if (next >= min && next <= max) {
+                    input.value = next;
+                }
+            });
         });
 
         // Prevent zooming on double tap (mobile)
